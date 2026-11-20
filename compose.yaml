@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16.6
+    environment:
+      POSTGRES_USER: atlas
+      POSTGRES_DB: atlas
+      POSTGRES_PASSWORD: ${PG_PASSWORD:?Copy .env.example to .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "atlas", "-d", "atlas"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+  mongo:
+    image: mongo:7.0.28
+    volumes: [documents:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+  graph:
+    image: neo4j:5.26.0-community
+    environment:
+      NEO4J_AUTH: neo4j/${GRAPH_PASSWORD:?Copy .env.example to .env}
+      GRAPH_PASSWORD: ${GRAPH_PASSWORD}
+      NEO4J_server_memory_heap_max__size: 384m
+      NEO4J_server_memory_pagecache_size: 128m
+      NEO4J_server_default__advertised__address: localhost
+    ports: ["127.0.0.1:7474:7474","127.0.0.1:7687:7687"]
+    volumes: [network:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p \"$$GRAPH_PASSWORD\" 'RETURN 1'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+  redis:
+    image: redis:7.4-alpine
+  app:
+    build: .
+    environment:
+      PGHOST: postgres
+      PGUSER: atlas
+      PGPASSWORD: ${PG_PASSWORD}
+      PGDATABASE: atlas
+      MONGO_URI: mongodb://mongo:27017
+      GRAPH_URI: bolt://graph:7687
+      GRAPH_PASSWORD: ${GRAPH_PASSWORD}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: {condition: service_healthy}
+      mongo: {condition: service_healthy}
+      graph: {condition: service_healthy}
+volumes:
+  pgdata:
+  documents:
+  network:
