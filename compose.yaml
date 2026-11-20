@@ -51,6 +51,18 @@ services:
       postgres: {condition: service_healthy}
       mongo: {condition: service_healthy}
       graph: {condition: service_healthy}
+  web:
+    extends:
+      service: app
+    entrypoint: ["python", "project/web/server.py"]
+    environment:
+      ATLAS_WEB_BIND: 0.0.0.0
+    ports: ["127.0.0.1:8765:8765"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8765/health', timeout=3).read()"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
 volumes:
   pgdata:
   documents:

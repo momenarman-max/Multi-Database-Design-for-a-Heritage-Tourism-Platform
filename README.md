@@ -5,6 +5,33 @@
 
 [شرائح العرض PDF](project/slides/heritage-atlas.pdf) · [سيناريو العرض](project/docs/demo.md) · [التصميم](project/docs/architecture.md) · [المستودع](https://github.com/momenarman-max/Multi-Database-Design-for-a-Heritage-Tourism-Platform)
 
+## تشغيل واجهة الويب على جهاز جديد
+
+نزّل المستودع وفك الضغط عنه، أو استنسخه باستخدام Git. ثبّت Docker مع Compose v2 الذي يدعم الخيار `--wait`، وشغّل Docker بحاويات Linux. افتح الطرفية في المجلد الذي يحتوي على `compose.yaml`.
+
+1. أنشئ ملف الإعداد المحلي مرة واحدة. على Windows استخدم `Copy-Item .env.example .env` في PowerShell، وعلى Linux أو macOS استخدم `cp .env.example .env`.
+2. نفّذ الأوامر التالية بالترتيب. يجهّز أمر `seed` المواقع والجولات والزائرة التجريبية نور.
+
+```sh
+docker compose build app web
+docker compose up -d --wait postgres mongo graph redis
+docker compose run --rm app seed
+docker compose up -d --wait web
+```
+
+3. افتح [أطلس التراث على جهازك](http://127.0.0.1:8765) بنفس العنوان. لتشغيله مرة أخرى بعد إيقافه استخدم `docker compose up -d --wait web redis`. عند الانتهاء استخدم `docker compose down` للاحتفاظ بالحجوزات والتقييمات في وحدات التخزين.
+
+### جرّب الحجز والتقييم
+
+ابدأ من **اختر جولتك**. تعرض صفحة البلدة القديمة جولة ريم بـ45 شيكل وجولة سليم بـ50 شيكل ضمن بيانات العرض.
+
+1. اضغط **احجز الجولة** بجانب المرشد، ثم **اطلب الحجز** لتسجيل طلب محلي باسم نور.
+2. اضغط **تأكيد حجزي**، ثم **أكملت الزيارة**. يُسجّل المشروع زيارة واحدة للحجز المكتمل.
+3. اختر من نجمة إلى خمس نجوم، واكتب تعليقًا، ثم اضغط **حفظ تقييمي**. عند العودة إلى الصفحة سترى إحصاءات الموقع المحدّثة.
+4. افتح **حجز نور** لمراجعة آخر حجز في هذا المتصفح. يبقى الحجز متاحًا بعد تحديث الصفحة. تعرض الصفحة العامة أعلى خمسة تقييمات، ويمكن قراءة تعليقك من دفتر الرحلة.
+
+الواجهة مخصّصة للعرض المحلي. للاستعلام عن حالة الخدمات استخدم `docker compose ps`، ولتشخيص مشكلة تشغيل استخدم `docker compose logs --tail=50 web`. إذا ظهرت الصفحة دون جولات فتحقّق من نجاح أمر `seed`. عند تعارض المنفذ 8765 أغلق النسخة المحلية السابقة قبل بدء خادم آخر.
+
 ## التشغيل على الجهاز المجهّز
 من PowerShell داخل المجلد الذي يحتوي README.md:
 ```powershell
@@ -15,7 +42,7 @@
 ```
 يشغّل local.ps1 الخدمات المحلية عند الحاجة ويستخدم بيانات العرض المهيأة. أدلة البرامج والبيانات خارج مجلد الرفع، في مجلد work الخاص بهذه الجلسة. إذا نقلت المشروع، عيّن ATLAS_RUNTIME إلى المسار الكامل لذلك المجلد. منفذ Neo4j Browser المحلي 57474 ومنفذ Bolt المحلي 57687.
 
-## التشغيل على جهاز جديد باستخدام Docker Compose
+## اختبارات سطر الأوامر باستخدام Docker Compose
 يتطلب Docker مع Compose v2 وحاويات Linux. من جذر المستودع:
 ```powershell
 Copy-Item .env.example .env
@@ -44,6 +71,7 @@ $env:REDIS_URL='redis://localhost:6379/0'
 $env:PYTHONUTF8='1'
 .\.venv\Scripts\python project/app/atlas.py seed
 .\.venv\Scripts\python project/app/atlas.py --help
+.\.venv\Scripts\python project/web/server.py
 ```
 
 ## جولة سريعة
@@ -63,6 +91,7 @@ analytics
 ## دليل الملفات
 | المسار | المحتوى |
 |---|---|
+| project/web | واجهة عربية للحجز والتقييم وخادم HTTP يتصل بطبقة التطبيق |
 | project/app | واجهة سطر الأوامر، خدمة الحجز والصفحة، بيانات العينة، التحقق من المراجع |
 | project/db | SQL وCypher وMongoDB وLua وأمثلة CRUD |
 | project/tests | اختبارات تكامل على خدمات فعلية |
