@@ -1,0 +1,4 @@
+psycopg[binary]==3.2.9
+pymongo==4.13.2
+neo4j==5.28.2
+redis==6.2.0
