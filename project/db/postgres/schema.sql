@@ -32,3 +32,9 @@ BEGIN
 END $$;
 CREATE OR REPLACE TRIGGER review_eligibility BEFORE INSERT OR UPDATE ON reviews
 FOR EACH ROW EXECUTE FUNCTION validate_review();
+CREATE TABLE IF NOT EXISTS web_credentials (
+ visitor_id uuid PRIMARY KEY REFERENCES visitors(id) ON DELETE CASCADE,
+ salt bytea NOT NULL, verifier bytea NOT NULL
+);
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS departure_at timestamptz
+ CHECK (departure_at IS NULL OR (offering_type='guesthouses' AND departure_at>service_at));
