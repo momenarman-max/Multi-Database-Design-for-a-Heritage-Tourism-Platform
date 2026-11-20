@@ -20,15 +20,59 @@ function account(){ $('#account').textContent=me?me.name+' · حسابي':'دخ�
 function auth(create=false){
  modal(create?'إنشاء حساب زائر':'تسجيل الدخول','<form id="auth">'+(create?'<label>الاسم<input name="name" maxlength="80" required autocomplete="name"></label>':'')+'<label>البريد الإلكتروني<input type="email" name="email" required autocomplete="email" dir="ltr"></label><label>كلمة المرور<input type="password" name="password" minlength="8" maxlength="128" required autocomplete="'+(create?'new':'current')+'-password" dir="ltr"></label>'+(create?'<fieldset><legend>اهتماماتك</legend>'+['آثار','حرف','عمارة'].map(x=>'<label><input type="checkbox" name="interest" value="'+x+'"> '+x+'</label>').join('')+'</fieldset>':'')+'<button class="primary" value="'+(create?'register':'login')+'">'+(create?'إنشاء الحساب':'دخول')+'</button> <button type="button" class="secondary" data-act="'+(create?'login':'register')+'">'+(create?'لدي حساب':'إنشاء حساب جديد')+'</button></form>');
 }
+const destinationPhotos={
+ 'البلدة القديمة في الخليل':['hebron-old.jpg','سوق في البلدة القديمة بالخليل'],
+ 'سوق القزازين':['hebron-glass.jpg','من حرفة المدينة: الزجاج الخليلي'],
+ 'حارة العقابة':['aqaba.jpg','حارة العقابة التاريخية · الخليل'],
+ 'ساحة المهد':['manger.jpg','ساحة المهد · بيت لحم'],
+ 'شارع النجمة':['star.jpg','شارع النجمة · بيت لحم'],
+ 'بيت ساحور القديمة':['sahour.jpg','داخل بيت في بيت ساحور · صورة تاريخية'],
+ 'البلدة القديمة في نابلس':['nablus-old.jpg','البلدة القديمة · نابلس'],
+ 'خان الوكالة':['nablus-street.jpg','من محيط الخان: البلدة القديمة في نابلس'],
+ 'تل الرميدة':['rumeida.jpg','بقايا البركة الغربية في تل الرميدة · الخليل']
+};
+function placePhoto(site){
+ const photo=destinationPhotos[site.name_ar];
+ if(!photo)return '';
+ return '<figure class="place-photo"><img src="/'+photo[0]+'" alt="'+photo[1]+'"><figcaption>'+photo[1]+'</figcaption></figure>';
+}
+function mountGallery(){
+ const figure=view.querySelector('.hero figure');
+ const photos=[destinationPhotos['ساحة المهد'],destinationPhotos['حارة العقابة'],destinationPhotos['البلدة القديمة في نابلس'],
+  ...Object.values(destinationPhotos).filter(photo=>!['manger.jpg','aqaba.jpg','nablus-old.jpg'].includes(photo[0])),
+  ['hebron.jpg','الحرم الإبراهيمي · الخليل'],['bethlehem.jpg','كنيسة المهد · بيت لحم'],
+  ['Nablus_Great_Mosque.jpg','مئذنة الجامع الكبير · نابلس، صورة تاريخية'],
+  ['Palestine-2013-Aerial-Mar_Saba_Monastery.jpg','دير مار سابا · شرق بيت لحم']];
+ figure.className='heritage-gallery';
+ figure.setAttribute('aria-live','off');
+ figure.innerHTML=photos.map(([file,title],i)=>'<img src="/'+file+'" alt="'+title+'" class="'+(i===0?'current':'')+'" aria-hidden="'+(i!==0)+'">').join('')+
+ '<figcaption></figcaption><button type="button" class="gallery-play">إيقاف العرض</button>';
+ const slides=Array.from(figure.querySelectorAll('img')),caption=figure.querySelector('figcaption'),button=figure.querySelector('button');
+ let current=0, timer;
+ caption.textContent=photos[current][1];
+ function advance(){
+  if(!figure.isConnected){clearInterval(timer);return;}
+  slides[current].classList.remove('current');slides[current].setAttribute('aria-hidden','true');
+  current=(current+1)%slides.length;
+  slides[current].classList.add('current');slides[current].setAttribute('aria-hidden','false');
+  caption.textContent=photos[current][1];
+ }
+ function play(){timer=setInterval(advance,2000);button.textContent='إيقاف العرض';}
+ button.onclick=()=>{
+  if(timer){clearInterval(timer);timer=null;button.textContent='تشغيل العرض';}else play();
+ };
+ play();
+}
 function home(){
- view.innerHTML='<section class="hero"><div class="heroCopy"><p class="location">دليل السياحة التراثية في فلسطين</p><h1>اكتشف فلسطين<br>على مهل</h1><p>تجوّل بين أسواق الخليل وأزقة نابلس وحارات بيت لحم. اختر موقعًا وتعرّف إلى حكايته ومرشديه وبيوت الضيافة القريبة.</p><button class="gold" data-act="explore">استكشف الوجهات ↓</button></div><figure><img src="/market.jpg" alt="رسم توضيحي لسوق حجري في الخليل"><figcaption>البلدة القديمة في الخليل · رسم توضيحي</figcaption></figure></section><section class="section"><h2>دليل الوجهات</h2><div class="filters"><label>ابحث عن موقع<input id="search" type="search" placeholder="اسم الموقع أو وصفه"></label><label>المدينة<select id="city"><option value="">كل المدن</option>'+catalog.cities.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label><label>التراث<select id="tag"><option value="">كل الأنواع</option>'+['آثار','حرف','عمارة'].map(x=>'<option>'+x+'</option>').join('')+'</select></label></div><p id="count"></p><div class="grid" id="cards"></div></section>';
+ view.innerHTML='<section class="hero"><div class="heroCopy"><p class="location">دليل السياحة التراثية في فلسطين</p><h1>اكتشف فلسطين<br>على مهل</h1><p>تجوّل بين أسواق الخليل وأزقة نابلس وحارات بيت لحم. اختر موقعًا وتعرّف إلى حكايته ومرشديه وبيوت الضيافة القريبة.</p><button class="gold" data-act="explore">استكشف الوجهات ↓</button></div><figure></figure></section><section class="section"><h2>دليل الوجهات</h2><div class="filters"><label>ابحث عن موقع<input id="search" type="search" placeholder="اسم الموقع أو وصفه"></label><label>المدينة<select id="city"><option value="">كل المدن</option>'+catalog.cities.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('')+'</select></label><label>التراث<select id="tag"><option value="">كل الأنواع</option>'+['آثار','حرف','عمارة'].map(x=>'<option>'+x+'</option>').join('')+'</select></label></div><p id="count"></p><div class="grid" id="cards"></div></section>';
+ mountGallery();
  for(const id of ['search','city','tag']) $('#'+id).oninput=cards;
  cards();
 }
 function cards(){
  const rows=catalog.sites.filter(s=>(!$('#city').value||s.city_id===$('#city').value)&&(!$('#tag').value||s.tags.includes($('#tag').value))&&(s.name_ar+' '+s.description_ar).includes($('#search').value.trim()));
  $('#count').textContent=arabic(rows.length)+' وجهات مطابقة';
- $('#cards').innerHTML=rows.map(s=>'<a class="card" href="'+linkSite(s._id)+'"><small>'+esc(city(s.city_id))+' · '+esc(s.tags.join('، '))+'</small><h3>'+esc(s.name_ar)+'</h3><p>'+esc(s.description_ar)+'</p><b>استكشف الموقع ←</b></a>').join('')||'جرّب تغيير المدينة أو نوع التراث.';
+ $('#cards').innerHTML=rows.map(s=>'<a class="card" href="'+linkSite(s._id)+'">'+placePhoto(s)+'<small>'+esc(city(s.city_id))+' · '+esc(s.tags.join('، '))+'</small><h3>'+esc(s.name_ar)+'</h3><p>'+esc(s.description_ar)+'</p><b>استكشف الموقع ←</b></a>').join('')||'جرّب تغيير المدينة أو نوع التراث.';
 }
 function offers(rows,kind){
  return rows.map(o=>{const tour=kind==='tours', g=tour?item('guides',o.guide_id):null;
@@ -50,7 +94,7 @@ function itinerary(s){
 }
 function site(data){
  const {site:s,tours,guesthouses}=data.MongoDB,{stats,reviews}=data.PostgreSQL,{nearby,guides}=data.Neo4j;
- return '<section class="section"><a href="#/">→ دليل الوجهات</a><div class="intro"><small>'+esc(city(s.city_id))+' / '+esc(s.tags.join('، '))+'</small><h1>'+esc(s.name_ar)+'</h1><p>'+esc(s.description_ar)+'</p></div><div class="content"><div><h2>عن المكان وتراثه</h2><p>'+esc(s.description_ar)+'</p>'+(s._id===catalog.sites[0]._id?'<p>تحتفظ البلدة القديمة بنسيج عمراني تشكّل في العصر المملوكي، وتكشف أسواقها وحاراتها علاقة التجارة بالحياة اليومية حول الحرم الإبراهيمي. أُدرجت على قائمة التراث العالمي عام ٢٠١٧. <a class="under" href="https://whc.unesco.org/en/list/1565/">صفحة الموقع لدى اليونسكو</a></p>':'')+itinerary(s)+'<h2>جولات مع المرشدين</h2>'+offers(tours,'tours')+'<h2>بيوت الضيافة</h2>'+offers(guesthouses,'guesthouses')+'<h2>تقييمات الزوار</h2>'+reviews.map(r=>'<div class="review"><b class="stars">'+arabic(r.rating)+' / ٥ ★</b><p>'+esc(r.body)+'</p></div>').join('')+(reviews.length?'':'كن أول من يقيّم خدمة بعد إكمال حجزها.')+'</div><aside class="facts"><h2>دليل الزيارة</h2><p>'+esc(s.opening_info)+'</p><dl><div><dt>زيارات مكتملة</dt><dd>'+arabic(stats.visits)+'</dd></div><div><dt>متوسط التقييم</dt><dd>'+(stats.mean_rating?arabic(stats.mean_rating)+' / ٥':'لا تقييمات')+'</dd></div></dl><h3>مرشدون يخدمون المنطقة</h3><p>'+esc(guides.map(g=>g.name).join('، ')||'لا يوجد مرشد مدرج')+'</p><h3>مواقع قريبة</h3>'+nearby.map(n=>'<a class="under" href="'+linkSite(n.id)+'">'+esc(n.name)+'</a>').join(' · ')+(nearby.length?'':'لا توجد مواقع مرتبطة حاليًا.')+'</aside></div></section>';
+ return '<section class="section"><a href="#/">→ دليل الوجهات</a><div class="intro"><small>'+esc(city(s.city_id))+' / '+esc(s.tags.join('، '))+'</small><h1>'+esc(s.name_ar)+'</h1>'+placePhoto(s)+'<p>'+esc(s.description_ar)+'</p></div><div class="content"><div><h2>عن المكان وتراثه</h2><p>'+esc(s.description_ar)+'</p>'+(s._id===catalog.sites[0]._id?'<p>تحتفظ البلدة القديمة بنسيج عمراني تشكّل في العصر المملوكي، وتكشف أسواقها وحاراتها علاقة التجارة بالحياة اليومية حول الحرم الإبراهيمي. أُدرجت على قائمة التراث العالمي عام ٢٠١٧. <a class="under" href="https://whc.unesco.org/en/list/1565/">صفحة الموقع لدى اليونسكو</a></p>':'')+itinerary(s)+'<h2>جولات مع المرشدين</h2>'+offers(tours,'tours')+'<h2>بيوت الضيافة</h2>'+offers(guesthouses,'guesthouses')+'<h2>تقييمات الزوار</h2>'+reviews.map(r=>'<div class="review"><b class="stars">'+arabic(r.rating)+' / ٥ ★</b><p>'+esc(r.body)+'</p></div>').join('')+(reviews.length?'':'كن أول من يقيّم خدمة بعد إكمال حجزها.')+'</div><aside class="facts"><h2>دليل الزيارة</h2><p>'+esc(s.opening_info)+'</p><dl><div><dt>زيارات مكتملة</dt><dd>'+arabic(stats.visits)+'</dd></div><div><dt>متوسط التقييم</dt><dd>'+(stats.mean_rating?arabic(stats.mean_rating)+' / ٥':'لا تقييمات')+'</dd></div></dl><h3>مرشدون يخدمون المنطقة</h3><p>'+esc(guides.map(g=>g.name).join('، ')||'لا يوجد مرشد مدرج')+'</p><h3>مواقع قريبة</h3>'+nearby.map(n=>'<a class="under" href="'+linkSite(n.id)+'">'+esc(n.name)+'</a>').join(' · ')+(nearby.length?'':'لا توجد مواقع مرتبطة حاليًا.')+'</aside></div></section>';
 }
 function bookingForm(kind,id){
  if(!me){pending={kind,id};return auth();}
@@ -76,7 +120,11 @@ async function route(){
  if(!page){location.hash='/';return;}
  const data=await api(page===site?'sites/'+encodeURIComponent(path.split('/')[2]):path.slice(1));
  if(rev!==revision)return;view.innerHTML=page(data);}
- window.scrollTo(0,0);
+ for(const a of document.querySelectorAll('nav a')){
+  if(a.hash==='#'+path || (path.startsWith('/site/') && a.hash==='#/'))a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');
+ }
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches) view.firstElementChild?.animate([{opacity:.45,transform:'translateY(7px)'},{opacity:1,transform:'translateY(0)'}],{duration:240,easing:'ease-out'});
+ window.scrollTo({top:0,behavior:'instant'});
  }catch(e){if(rev===revision)view.textContent=e.message;}
 }
 $('#close').onclick=()=>dialog.close();dialog.addEventListener('close',()=>{if(!dialog.open)pending=null;});
@@ -104,4 +152,9 @@ document.addEventListener('submit',async event=>{
 });
 async function start(){try{[catalog,me]=await Promise.all([api('catalog'),api('me')]);account();await route();}catch(e){view.textContent=e.message;}}
 window.addEventListener('hashchange',route);start();
+
+
+
+
+
 

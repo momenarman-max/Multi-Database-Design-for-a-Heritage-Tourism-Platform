@@ -23,7 +23,7 @@ from stores import cache, cypher, docs, source, sql
 
 PORT = int(os.getenv("ATLAS_WEB_PORT", "8765"))
 HOST = f"127.0.0.1:{PORT}"
-ASSETS = {"index.html", "style.css", "app.js", "market.jpg"}
+ASSETS = {'bethlehem.jpg', 'star.jpg', 'nablus-old.jpg', 'Nablus_Great_Mosque.jpg', 'hebron.jpg', 'nablus-street.jpg', 'style.css', 'sahour.jpg', 'index.html', 'manger.jpg', 'hebron-glass.jpg', 'app.js', 'Palestine-2013-Aerial-Mar_Saba_Monastery.jpg', 'aqaba.jpg', 'rumeida.jpg', 'hebron-old.jpg'}
 TTL = 7200
 
 
@@ -203,3 +203,6 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__=="__main__":
     ThreadingHTTPServer((os.getenv("ATLAS_WEB_BIND","127.0.0.1"),PORT),Handler).serve_forever()
+
+
+
