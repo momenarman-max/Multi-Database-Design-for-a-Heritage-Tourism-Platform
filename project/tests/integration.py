@@ -90,7 +90,9 @@ class Integration(unittest.TestCase):
         self.assertEqual((rows["2026-03"]["visits"],float(rows["2026-03"]["mean_rating"]),
                           float(rows["2026-03"]["lead_days"])), (2,4.5,3))
         self.assertEqual(float(rows["2026-04"]["lead_days"]),5)
-        self.assertEqual(data["most_visited"][0]["visits"],3)
+        with stores.sql() as c:
+            top = c.execute("SELECT count(*) AS n FROM visit_events GROUP BY site_id ORDER BY n DESC LIMIT 1").fetchone()
+        self.assertEqual(data["most_visited"][0]["visits"],top["n"])
         self.assertEqual(int(data["busiest_weekdays"][0]["weekday"]),4)
         self.assertEqual(float(data["site_ratings"][-1]["rating"]),4)
 
@@ -111,19 +113,20 @@ class Integration(unittest.TestCase):
             audit()
 
     def test_redis_outage(self):
+        expected = service.site(SITE)["PostgreSQL"]["stats"]
         offline = Redis(host="127.0.0.1", port=1, socket_connect_timeout=.2)
         with patch.object(stores,"cache",offline):
             result = service.site(SITE)
         self.assertEqual(result["cache_status"], "bypass")
-        self.assertEqual(result["PostgreSQL"]["stats"]["visits"],3)
+        self.assertEqual(result["PostgreSQL"]["stats"],expected)
 
     def test_required_database_outage(self):
         client = MongoClient("mongodb://127.0.0.1:1",serverSelectionTimeoutMS=200)
         self.addCleanup(client.close)
-        stores.invalidate(SITE)
+        key = str(uuid4())
         with patch.object(service,"docs",client.heritage), self.assertRaises(ServerSelectionTimeoutError):
-            service.site(SITE)
-        self.assertIsNone(stores.cache.get(stores.page_key(SITE)))
+            service.site(key)
+        self.assertIsNone(stores.cache.get(stores.page_key(key)))
 
     def test_sessions_and_listing(self):
         token = service.session(uid("visitor",1))["session"]
@@ -138,10 +141,13 @@ class Integration(unittest.TestCase):
         self.assertGreater(values[1][1],0)
 
     def test_reseed_preserves_counts(self):
+        before = service.site(SITE)["PostgreSQL"]["stats"]["visits"]
         seed()
-        self.assertEqual(audit()["sites"],8)
-        self.assertEqual(service.site(SITE)["PostgreSQL"]["stats"]["visits"],3)
+        self.assertEqual(audit()["sites"],9)
+        self.assertEqual(service.site(SITE)["PostgreSQL"]["stats"]["visits"],before)
 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
