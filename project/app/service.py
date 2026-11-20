@@ -46,7 +46,7 @@ def register(name, email, interests, languages):
     return key
 
 
-def request(visitor, kind, offering, at=None):
+def request(visitor, kind, offering, at=None, departure=None):
     if kind not in ("tours", "guesthouses"):
         raise ValueError("Select tours or guesthouses")
     item = one(kind, offering)
@@ -62,8 +62,8 @@ def request(visitor, kind, offering, at=None):
     key = str(uuid4())
     with sql() as c:
         c.execute("""INSERT INTO bookings(id,visitor_id,offering_id,offering_type,site_id,
-                    guide_id,requested_at,service_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""",
-                  (key, visitor, offering, kind, site, guide, now, service_at))
+                    guide_id,requested_at,service_at,departure_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                  (key, visitor, offering, kind, site, guide, now, service_at, departure))
     return key
 
 
@@ -73,7 +73,7 @@ def transition(key, target):
         row = c.execute("SELECT * FROM bookings WHERE id=%s FOR UPDATE", (key,)).fetchone()
         if not row or row["status"] not in allowed[target]:
             raise ValueError(f"Booking cannot transition to {target}")
-        if target == "completed" and row["service_at"] > datetime.now(timezone.utc):
+        if target == "completed" and (row.get("departure_at") or row["service_at"]) > datetime.now(timezone.utc):
             raise ValueError("Service time has not arrived")
         c.execute("UPDATE bookings SET status=%s,updated_at=now() WHERE id=%s", (target, key))
         if target == "completed":
