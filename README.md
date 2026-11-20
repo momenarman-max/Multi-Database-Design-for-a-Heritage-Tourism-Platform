@@ -99,3 +99,20 @@ analytics
 | CONTRIBUTIONS.md | خطة العرض وسجل المساهمات الفعلية |
 
 النموذج مخصص لعرض محلي ببيانات مصطنعة. إصدارات الأدوات مثبتة لتكرار التجربة. تحتفظ PostgreSQL بالحجوزات والتقييمات وبصمات كلمات المرور المملّحة، وتحفظ Redis جلسات تسجيل الدخول لمدة ساعتين.
+
+## معرض الصور
+يعرض الموقع صورة جديدة كل ثانيتين. الصور محفوظة محليًا من ويكيميديا كومنز، ويضبط المعرض اقتصاصها حسب حجم الشاشة.
+
+- [الحرم الإبراهيمي في الخليل](https://commons.wikimedia.org/wiki/File:Hebron_Cave_of_the_Patriarchs.jpg) — Djampa، [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- [كنيسة المهد في بيت لحم](https://commons.wikimedia.org/wiki/File:Church_of_the_Nativity_(7703592746).jpg) — Neil Ward، [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/).
+- [مئذنة الجامع الكبير في نابلس](https://commons.wikimedia.org/wiki/File:Nablus_Great_Mosque.jpg) — K. A. C. Creswell، ملكية عامة.
+- [دير مار سابا](https://commons.wikimedia.org/wiki/File:Palestine-2013-Aerial-Mar_Saba_Monastery.jpg) — Godot13، [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- [Hebron market old city.jpg](https://commons.wikimedia.org/wiki/File:Hebron_market_old_city.jpg) — Makbula Nassar، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [Interior of peasant home at Beit Sahur LOC matpc.04150.jpg](https://commons.wikimedia.org/wiki/File:Interior_of_peasant_home_at_Beit_Sahur_LOC_matpc.04150.jpg) — Matson Collection، Public domain 
+- [Manger Square.jpg](https://commons.wikimedia.org/wiki/File:Manger_Square.jpg) — Alexey Goral، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [Nablus old city 24.jpg](https://commons.wikimedia.org/wiki/File:Nablus_old_city_24.jpg) — Mohammad Hijjawi، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [Nablus old city 25.jpg](https://commons.wikimedia.org/wiki/File:Nablus_old_city_25.jpg) — Mohammad Hijjawi، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [Traces of the Western Purity Pool discovered at Tel Rumeida in the city of Hebron.jpg](https://commons.wikimedia.org/wiki/File:Traces_of_the_Western_Purity_Pool_discovered_at_Tel_Rumeida_in_the_city_of_Hebron.jpg) — MohmmadRjab، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [View of star street.JPG](https://commons.wikimedia.org/wiki/File:View_of_star_street.JPG) — Tiamat، CC BY-SA 3.0 https://creativecommons.org/licenses/by-sa/3.0
+- [حارة العقابة في الخليل التاريخية.jpg](https://commons.wikimedia.org/wiki/File:%D8%AD%D8%A7%D8%B1%D8%A9_%D8%A7%D9%84%D8%B9%D9%82%D8%A7%D8%A8%D8%A9_%D9%81%D9%8A_%D8%A7%D9%84%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE%D9%8A%D8%A9.jpg) — Madosophy Ahmad، CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+- [Hebron glass display](https://commons.wikimedia.org/wiki/File:Hebron_glass_display.jpg) — FlightlessTofu، [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
